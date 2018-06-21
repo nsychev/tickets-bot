@@ -17,7 +17,7 @@ TICKETS = open("../data/ticketnames.txt", "r").read().split("\n")
 def start(bot, update):
     update.message.reply_text('''Привет! Я расскажу тебе о билетах по матану в красивых картинках. Спроси меня любой билет и я тебе отправлю картинку
 
-[Бота](https://github.com/nsychev/matan) сделал @nsychev · Билеты написал @cannor147''', parse_mode="Markdown")
+[Бота](https://github.com/nsychev/tickets-bot) сделал @nsychev · Билеты написал @cannor147''', parse_mode="Markdown")
 
 def ticket(bot, update):
     if not update.message:
