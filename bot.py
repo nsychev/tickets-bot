@@ -37,5 +37,19 @@ def ticket(bot, update):
         open("../data/ticket-{}.png".format(num)),
         caption=ticket_name
     )
-
     
+def TrueFilter(*args, **kwargs):
+    return True
+
+def error(bot, update, error):
+    logger.warning(str(error))
+
+updater = Updater(TOKEN)
+dp = updater.dispatcher
+dp.add_handler(CommandHandler("start", start))
+dp.add_handler(CommandHandler("help", start))
+dp.add_handler(MessageHandler(TrueFilter, ticket))
+dp.add_error_handler(error)
+
+updater.start_polling()
+updater.idle()
