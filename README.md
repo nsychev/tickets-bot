@@ -35,7 +35,7 @@ mkdir data
 
 > **NB**: тут нумерация с нуля, потому что ImageMagick по дефолту создает картинки именно с нуля
 
-4. Добавить токен в `bot/token.py` (предварительно создав бота у [@BotFather](https://t.me/BotFather)).
+4. Добавить токен в `bot/config.py` (предварительно создав бота у [@BotFather](https://t.me/BotFather)).
 
 ```python
 TOKEN = "123456789:QWERTYUIOPa_sdfghjklZXCVBNM12345678"

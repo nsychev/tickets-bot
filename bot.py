@@ -4,7 +4,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler
 import logging
 import re
-from token import TOKEN
+from config import TOKEN
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
