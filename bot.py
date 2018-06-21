@@ -28,7 +28,7 @@ def ticket(bot, update):
         update.message.reply_text("Не нашел число в твоём сообщении :(")
         return
     
-    num = int(match.group(0)) - 1
+    num = int(result.group(0)) - 1
     if num >= len(TICKETS) or num < 0:
         update.message.reply_text("Билеты имеют номера с 1 до {}. Попробуй другое число".format(len(TICKETS)))
     
