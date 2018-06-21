@@ -4,7 +4,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler
 import logging
 import re
-from config import TOKEN
+from config import TOKEN, URL
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -31,10 +31,11 @@ def ticket(bot, update):
     num = int(result.group(0)) - 1
     if num >= len(TICKETS) or num < 0:
         update.message.reply_text("Билеты имеют номера с 1 до {}. Попробуй другое число".format(len(TICKETS)))
+        return
     
     ticket_name = TICKETS[num]
     update.message.reply_photo(
-        "https://nsychev.ru/tickets/ticket-{}.png".format(num),
+        URL.format(num),
         caption=ticket_name
     )
     
