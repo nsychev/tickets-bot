@@ -34,7 +34,7 @@ def ticket(bot, update):
     
     ticket_name = TICKETS[num]
     update.message.reply_photo(
-        open("../data/ticket-{}.png".format(num)),
+        open("../data/ticket-{}.png".format(num), "rb"),
         caption=ticket_name
     )
     
