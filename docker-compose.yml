@@ -1,0 +1,16 @@
+version: "3.6"
+services:
+    bot:
+        image: nsychev/tickets-bot
+        build:
+            context: .
+            dockerfile: Dockerfile
+        depends_on:
+            - postgres
+        volumes:
+            - ./tickets/:/app/tickets/
+            - ./bot/:/app/bot/
+        restart: always
+    postgres:
+        image: postgres:alpine
+        restart: always
