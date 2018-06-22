@@ -20,6 +20,13 @@ RE = re.compile(r"\d+")
 BLACKLIST = []
 
 
+def PlainMatch(field, query):
+    return Expression(
+        fn.to_tsvector(field),
+        TS_MATCH,
+        fn.plainto_tsquery(query))
+
+
 def scan(bot, update):
     if update.message.chat.id != ADMIN_ID:
         return
@@ -89,9 +96,8 @@ def ticket(bot, update):
      
 def search(bot, update):
     response = ""
-    query = update.message.text.replace(" ", "|")
     try:
-        for ticket in Ticket.select().where(Match(Ticket.name, query)):
+        for ticket in Ticket.select().where(PlainMatch(Ticket.name, update.message.text)):
             response += "/{} {}\n".format(ticket.id, ticket.name)
     except:
         pass
