@@ -7,7 +7,7 @@ db = PostgresqlExtDatabase(DB_HOST, user=DB_USER, host=DB_HOST, port=DB_PORT)
 
 class Ticket(Model):
     id = IntegerField(primary_key=True)
-    name = CharField()
+    name = CharField(max_length=500)
     tag = CharField(max_length=10)
     
     class Meta:
