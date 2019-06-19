@@ -64,7 +64,7 @@ def start(bot, update):
 
     
 def help(bot, update):
-    update.message.reply_text(HELP_MESSAGE, parse_mode="Markdown")
+    update.message.reply_text(HELP_MESSAGE, parse_mode="Markdown", disable_web_page_preview=True)
 
 
 def ticket(bot, update):
@@ -80,6 +80,7 @@ def ticket(bot, update):
         ticket = Ticket.get(Ticket.id == num)
     except Ticket.DoesNotExist:
         update.message.reply_text("Не могу найти билет #{}\n\n/help — справка".format(num))
+        return
     
     update.message.reply_text(ticket.name)
     
@@ -106,7 +107,6 @@ def search(bot, update):
     update.message.reply_text(response)
      
 def dump_thread(bot, update):
-    update.message.reply_text("Никто тебя не просил это делать! Ты сам захотел!\n\nДанный процесс займет продолжительное время, т.к. я не хочу проблем с лимитами Телеграма")
     bot.send_chat_action(update.message.chat.id, "upload_photo")
     sleep(1)
     try:
@@ -125,7 +125,7 @@ def dump_thread(bot, update):
 
             
 def dump(bot, update):
-    if update.message.chat.id in BLACKLIST:
+    if update.message.chat.id != ADMIN_ID:
         update.message.reply_text("Данная функция недоступна для вашего аккаунта")
         return
     BLACKLIST.append(update.message.chat.id)
@@ -138,6 +138,10 @@ def TagFactory(tag):
         response = ""
         for ticket in Ticket.select().where(Ticket.tag == tag).order_by(Ticket.id):
             response += "/{} {}\n".format(ticket.id, ticket.name)
+            if len(response) >= 4000:
+                update.message.reply_text(response)
+                sleep(0.3)
+                response = ""
         update.message.reply_text(response)
     return process_tag
 
@@ -156,9 +160,8 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("scan", scan))
-    dp.add_handler(CommandHandler("min", TagFactory("min")))
-    dp.add_handler(CommandHandler("mod3", TagFactory("mod3")))
-    dp.add_handler(CommandHandler("mod4", TagFactory("mod4")))
+    for tag in TAGS:
+        dp.add_handler(CommandHandler(tag, TagFactory(tag)))
     dp.add_handler(CommandHandler("dump_all", dump))
     dp.add_handler(MessageHandler(TrueFilter, ticket))
     dp.add_error_handler(error)
@@ -167,6 +170,7 @@ if __name__ == "__main__":
     sleep(5.0)
     logger.info("Starting...")
     db.connect()
+    db.create_tables([Ticket, Image])
 
     updater.start_polling()
     updater.idle()
