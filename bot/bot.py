@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext.filters import Filters
 from telegram import InputMediaPhoto
 import logging, re, os, yaml, traceback
 
@@ -27,10 +28,11 @@ def PlainMatch(field, query):
         fn.plainto_tsquery(query))
 
 
-def scan(bot, update):
+def scan(update, context):
     if update.message.chat.id != ADMIN_ID:
         return
     
+    bot = context.bot
     bot.send_chat_action(update.message.chat.id, "typing")
     
     try:
@@ -59,17 +61,18 @@ def scan(bot, update):
     update.message.reply_text("\u2705 **Success**: update tickets", parse_mode="Markdown")
 
 
-def start(bot, update):
+def start(update, context):
     update.message.reply_text(WELCOME_MESSAGE, parse_mode="Markdown", disable_web_page_preview=True)
 
     
-def help(bot, update):
+def help(update, context):
     update.message.reply_text(HELP_MESSAGE, parse_mode="Markdown", disable_web_page_preview=True)
 
 
-def ticket(bot, update):
+def ticket(update, context):
     if not update.message:
         return
+    bot = context.bot
     text = update.message.text
     result = re.search(RE, text)
     if result is None:
@@ -95,7 +98,7 @@ def ticket(bot, update):
             photo.save()
 
      
-def search(bot, update):
+def search(update, context):
     response = ""
     try:
         for ticket in Ticket.select().where(PlainMatch(Ticket.name, update.message.text)):
@@ -106,7 +109,8 @@ def search(bot, update):
         response = "Ничего не найдено"
     update.message.reply_text(response)
      
-def dump_thread(bot, update):
+def dump_thread(update, context):
+    bot = context.bot
     bot.send_chat_action(update.message.chat.id, "upload_photo")
     sleep(1)
     try:
@@ -124,17 +128,17 @@ def dump_thread(bot, update):
         update.message.reply_text("\u274c **Failed**:\n```" + traceback.format_exc() + "```", parse_mode="Markdown")
 
             
-def dump(bot, update):
+def dump(update, context):
     if update.message.chat.id != ADMIN_ID:
         update.message.reply_text("Данная функция недоступна для вашего аккаунта")
         return
     BLACKLIST.append(update.message.chat.id)
-    thread = Thread(target = dump_thread, args=(bot, update))
+    thread = Thread(target = dump_thread, args=(update, context))
     thread.start()
     
 
 def TagFactory(tag):
-    def process_tag(bot, update):
+    def process_tag(update, context):
         response = ""
         for ticket in Ticket.select().where(Ticket.tag == tag).order_by(Ticket.id):
             response += "/{} {}\n".format(ticket.id, ticket.name)
@@ -146,16 +150,12 @@ def TagFactory(tag):
     return process_tag
 
 
-def TrueFilter(*args, **kwargs):
-    return True
-
-
-def error(bot, update, error):
-    logger.warning(str(error))
+def error(update, context):
+    logger.warning(str(context.error))
 
     
 if __name__ == "__main__":    
-    updater = Updater(TOKEN)
+    updater = Updater(TOKEN, use_context=True)  # temporary backward-compatibility argument
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     for tag in TAGS:
         dp.add_handler(CommandHandler(tag, TagFactory(tag)))
     dp.add_handler(CommandHandler("dump_all", dump))
-    dp.add_handler(MessageHandler(TrueFilter, ticket))
+    dp.add_handler(MessageHandler(Filters.all, ticket))
     dp.add_error_handler(error)
     
     logger.info("Waiting postgres")
