@@ -44,7 +44,7 @@ def scan(update, context):
             if not os.path.isdir(os.path.join(PATH, dir)) or dir.startswith("."):
                 continue
             
-            config = yaml.load(open(os.path.join(PATH, dir, "config.yml")).read())
+            config = yaml.safe_load(open(os.path.join(PATH, dir, "config.yml")).read())
             ticket = Ticket.create(id=dir, name=config["name"], tag=config["tag"])
             
             for file in sorted(os.listdir(os.path.join(PATH, dir))):
