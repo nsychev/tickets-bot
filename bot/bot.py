@@ -76,7 +76,7 @@ def ticket(update, context):
     text = update.message.text
     result = re.search(RE, text)
     if result is None:
-        return search(bot, update)
+        return search(update, context)
     
     num = int(result.group(0))
     try:
